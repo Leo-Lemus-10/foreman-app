@@ -16,18 +16,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
 
 Run the SQL in `supabase/schema.sql` in your Supabase SQL editor.
 
-## Run locally (development)
+## Run locally
 
 ```bash
 npm run dev
-```
-
-## Run production server
-
-`npm start` now runs a prestart build automatically (`next build`) before launching `next start`, so you no longer hit the missing `.next` build error when starting fresh.
-
-```bash
-npm start
 ```
 
 ## App routes
