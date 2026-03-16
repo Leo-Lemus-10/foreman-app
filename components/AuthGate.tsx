@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth";
 
@@ -8,16 +8,26 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const authenticated = typeof window !== "undefined" && isAuthenticated();
+  const [checked, setChecked] = useState(false);
+  const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
-    if (!authenticated) {
+    setAuthed(isAuthenticated());
+    setChecked(true);
+  }, []);
+
+  useEffect(() => {
+    if (checked && !authed) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     }
-  }, [authenticated, pathname, router]);
+  }, [checked, authed, pathname, router]);
 
-  if (!authenticated) {
+  if (!checked) {
     return <p className="p-6 text-sm text-slate-600">Checking credentials...</p>;
+  }
+
+  if (!authed) {
+    return <p className="p-6 text-sm text-slate-600">Redirecting to login...</p>;
   }
 
   return <>{children}</>;

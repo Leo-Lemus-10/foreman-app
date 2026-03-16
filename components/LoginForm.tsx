@@ -4,6 +4,23 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AUTH_STORAGE_KEY, isAuthenticated } from "@/lib/auth";
 
+const safeNextRoute = (rawNext: string | null) => {
+  if (!rawNext) {
+    return "/dashboard";
+  }
+
+  try {
+    const url = new URL(rawNext, window.location.origin);
+    if (url.origin !== window.location.origin) {
+      return "/dashboard";
+    }
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return "/dashboard";
+  }
+};
+
 export function LoginForm() {
   const [passcode, setPasscode] = useState("");
   const [error, setError] = useState("");
@@ -12,10 +29,12 @@ export function LoginForm() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (isAuthenticated()) {
+    const authed = isAuthenticated();
+
+    if (authed) {
       router.replace("/dashboard");
     }
-  }, [router]);
+  }, [router, searchParams]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,8 +56,10 @@ export function LoginForm() {
     }
 
     localStorage.setItem(AUTH_STORAGE_KEY, "true");
-    const nextRoute = searchParams.get("next") || "/dashboard";
-    router.push(nextRoute);
+    const rawNext = searchParams.get("next");
+    const sanitizedNextRoute = safeNextRoute(rawNext);
+
+    router.push(sanitizedNextRoute);
   };
 
   return (
